@@ -65,6 +65,17 @@ def transfer_asset():
 
     return jsonify({'message': 'Asset transfer transaction sent'}), 200
 
+@app.route('/get_asset_details', methods=['GET'])
+def get_asset_details():
+    token_id = request.args.get('token_id')
+    
+    if not token_id:
+        return jsonify({'error': 'Bad request'}), 400
+    
+    asset_details = contract.functions.getAssetDetails(int(token_id)).call()
+    
+    return jsonify({'asset_details': asset_details}), 200
+
 os.environ['WEB3_PROVIDER'] = 'http://localhost:8545'
 os.environ['CONTRACT_ADDRESS'] = '0xYourContractAddress'
 os.environ['CONTRACT_ABI'] = '[]'
