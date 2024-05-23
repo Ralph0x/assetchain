@@ -1,17 +1,17 @@
 from flask import Flask, request, jsonify
 from web3 import Web3
-import os
 import json
 
 app = Flask(__name__)
 
-web3_provider = os.getenv('WEB3_PROVIDER')
-web3 = Web3(Web3.HTTPProvider(web3_provider))
+WEB3_PROVIDER = 'http://localhost:8545'
+CONTRACT_ADDRESS = '0xYourContractAddress'
+CONTRACT_ABI = '[]'
 
-contract_address = os.getenv('CONTRACT_ADDRESS')
-abi = json.loads(os.getenv('CONTRACT_ABI'))
+web3 = Web3(Web3.HTTPProvider(WEB3_PROVIDER))
+abi = json.loads(CONTRACT_ABI)
 
-contract = web3.eth.contract(address=contract_address, abi=abi)
+contract = web3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
 
 @app.route('/tokenize_asset', methods=['POST'])
 def tokenize_asset():
@@ -20,16 +20,14 @@ def tokenize_asset():
 
     owner_address = request.json['owner_address']
     asset_details = request.json['asset_details']
-
     nonce = web3.eth.getTransactionCount(owner_address)
-    
+
     txn_dict = contract.functions.tokenizeAsset(asset_details).buildTransaction({
         'chainId': 1,
         'gas': 2000000,
         'gasPrice': web3.toWei('50', 'gwei'),
         'nonce': nonce,
     })
-
 
     return jsonify({'message': 'Asset tokenization transaction sent'}), 200
 
@@ -55,7 +53,7 @@ def transfer_asset():
     token_id = request.json['token_id']
 
     nonce = web3.eth.getTransactionCount(from_address)
-    
+
     txn_dict = contract.functions.transferAsset(to_address, int(token_id)).buildTransaction({
         'chainId': 1,
         'gas': 2000000,
@@ -75,10 +73,6 @@ def get_asset_details():
     asset_details = contract.functions.getAssetDetails(int(token_id)).call()
     
     return jsonify({'asset_details': asset_details}), 200
-
-os.environ['WEB3_PROVIDER'] = 'http://localhost:8545'
-os.environ['CONTRACT_ADDRESS'] = '0xYourContractAddress'
-os.environ['CONTRACT_ABI'] = '[]'
 
 if __name__ == '__main__':
     app.run(debug=True)
