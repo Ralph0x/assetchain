@@ -1,62 +1,62 @@
 import React, { useState } from 'react';
 
-interface TokenizationFormData {
-  assetDescription: string;
+interface AssetTokenizationFormData {
+  description: string;
   ownerName: string;
   ownerEmail: string;
 }
 
-const TokenizationForm: React.FC = () => {
-  const [formValues, setFormValues] = useState<TokenizationFormData>({
-    assetDescription: '',
+const AssetTokenizationForm: React.FC = () => {
+  const [tokenizationData, setTokenizationData] = useState<AssetTokenizationFormData>({
+    description: '',
     ownerName: '',
     ownerEmail: '',
   });
 
-  const handleChange = (
+  const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
-    setFormValues(prevValues => ({
-      ...prevValues,
+    setTokenizationData(prevData => ({
+      ...prevData,
       [name]: value,
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const TOKENIZATION_API_URL = process.env.REACT_APP_TOKENIZATION_API_URL || '';
+    const API_ENDPOINT = process.env.REACT_APP_TOKENIZATION_API_URL || '';
 
     try {
-      const response = await fetch(TOKENIZATION_API_URL, {
+      const apiResponse = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formValues),
+        body: JSON.stringify(tokenizationData),
       });
 
-      if (!response.ok) {
-        throw new Error('Tokenization request submission failed');
+      if (!apiResponse.ok) {
+        throw new Error('Asset tokenization request failed');
       }
 
       alert('Tokenization request submitted successfully.');
     } catch (error) {
       if (error instanceof Error) {
-        console.error('Submission Error:', error.message);
+        console.error('API Submission Error:', error.message);
       }
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleFormSubmit}>
       <div>
-        <label htmlFor="assetDescription">Asset Description</label>
+        <label htmlFor="description">Asset Description</label>
         <textarea
-          id="assetDescription"
-          name="assetDescription"
-          value={formValues.assetDescription}
-          onChange={handleChange}
+          id="description"
+          name="description"
+          value={tokenizationData.description}
+          onChange={handleInputChange}
           required
         />
       </div>
@@ -66,8 +66,8 @@ const TokenizationForm: React.FC = () => {
           type="text"
           id="ownerName"
           name="ownerName"
-          value={formValues.ownerName}
-          onChange={handleChange}
+          value={tokenidUsercretionData.ownerName}
+          onChange={handleInputChange}
           required
         />
       </div>
@@ -77,14 +77,14 @@ const TokenizationForm: React.FC = () => {
           type="email"
           id="ownerEmail"
           name="ownerEmail"
-          value={formValues.ownerEmail}
-          onChange={handleChange}
+          value={tokenizationData.ownerEmail}
+          onChange={handleInputChange}
           required
         />
       </div>
-      <button type="submit">Submit Request</button>
+      <button type="submit">Submit Tokenization Request</button>
     </form>
   );
 };
 
-export default TokenizationForm;
+export default AssetTokenizationForm;
