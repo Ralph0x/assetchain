@@ -6,6 +6,12 @@ interface AssetTokenizationFormData {
   ownerEmail: string;
 }
 
+interface FormStatus {
+  submitting: boolean;
+  error: string;
+  success: boolean;
+}
+
 const AssetTokenizationForm: React.FC = () => {
   const [tokenizationData, setTokenizationData] = useState<AssetTokenizationFormData>({
     description: '',
@@ -13,11 +19,17 @@ const AssetTokenizationForm: React.FC = () => {
     ownerEmail: '',
   });
 
+  const [formStatus, setFormStatus] = useState<FormStatus>({
+    submitting: false,
+    error: '',
+    success: false,
+  });
+
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
-    setTokenizationData(prevData => ({
+    setTokenizationData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
@@ -25,6 +37,7 @@ const AssetTokenizationForm: React.FC = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormStatus({ submitting: true, error: '', success: false });
     const API_ENDPOINT = process.env.REACT_APP_TOKENIZATION_API_URL || '';
 
     try {
@@ -40,10 +53,12 @@ const AssetTokenizationForm: React.FC = () => {
         throw new Error('Asset tokenization request failed');
       }
 
+      setFormStatus({ submitting: false, error: '', success: true });
       alert('Tokenization request submitted successfully.');
     } catch (error) {
       if (error instanceof Error) {
         console.error('API Submission Error:', error.message);
+        setFormStatus({ submitting: false, error: error.message, success: false });
       }
     }
   };
@@ -61,12 +76,12 @@ const AssetTokenizationForm: React.FC = () => {
         />
       </div>
       <div>
-        <label htmlFor="ownerName">Owner's Name</label>
+        <label htmlFor="ownerName">Owner's Name</labe
         <input
           type="text"
           id="ownerName"
           name="ownerName"
-          value={tokenidUsercretionData.ownerName}
+          value={tokenizationData.ownerName}
           onChange={handleInputChange}
           required
         />
@@ -82,7 +97,9 @@ const AssetTokenizationForm: React.FC = () => {
           required
         />
       </div>
-      <button type="submit">Submit Tokenization Request</button>
+      <button type="submit" disabled={formStatus.submitting}>Submit Tokenization Request</button>
+      {formStatus.error && <p style={{ color: 'red' }}>Error: {formStatus.error}</p>}
+      {formStatus.success && <p style={{ color: 'green' }}>Request successful!</p>}
     </form>
   );
 };
