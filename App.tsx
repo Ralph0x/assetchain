@@ -3,37 +3,37 @@ import AssetTokenizeForm from './AssetTokenizeForm';
 import Dashboard from './Dashboard';
 import { ethers } from 'ethers';
 
-interface UserState {
-  walletConnected: boolean;
+interface UserWalletState {
+  isConnected: boolean;
   transactionStatus: 'pending' | 'success' | 'error' | 'none';
 }
 
 const App: React.FC = () => {
-  const [userState, setUserState] = useState<UsermState>({
-    walletConnected: false,
+  const [walletState, setWalletState] = useState<UserWalletState>({
+    isConnected: false,
     transactionStatus: 'none',
   });
 
   useEffect(() => {
-    const connectWalletOnLoad = async () => {
+    const attemptWalletConnectionOnLoad = async () => {
       if (window.ethereum && ethereum.isMetaMask) {
         try {
           await ethereum.request({ method: 'eth_accounts' });
-          setUserState((prev) => ({ ...prev, walletConnected: true }));
+          setWalletState((prev) => ({ ...prev, isConnected: true }));
         } catch (error) {
-          console.error('Error connecting to Metamask:', error);
+          console.error('Error connecting to MetaMask:', error);
         }
       }
     };
 
-    connectWalletOnLoad();
+    attemptWalletConnectionOnLoad();
   }, []);
 
-  const connectWallet = async (): Promise<void> => {
-    if (window.ethernity) {
+  const initiateWalletConnection = async (): Promise<void> => {
+    if (window.ethereum) {
       try {
         await ethereum.request({ method: 'eth_requestAccounts' });
-        setUserState((prev) => ({ ...prev, walletConnected: true }));
+        setWalletState((prev) => ({ ...prev, isConnected: true }));
       } catch (error) {
         console.error('Could not connect to wallet:', error);
       }
@@ -42,36 +42,37 @@ const App: React.FC = () => {
     }
   };
 
-  const tokenizeAsset = async (assetDetails: any) => {
-    if (!userState.walletConnected) {
+  const executeAssetTokenization = async (assetDetails: any) => {
+    if (!walletState.isConnected) {
       console.log('Wallet not connected!');
       return;
     }
 
-    setUserState((prev) => ({ ...prev, transactionStatus: 'pending' }));
+    setWalletState((prev) => ({ ...prev, transactionStatus: 'pending' }));
 
     try {
-      const provider = new ethers.providers.Web3Provider((window as any).ethereum);
+      const provider = new ethers.providers.Web1Provider((window as any).ethereum);
       const signer = provider.getSigner();
-      const transaction = await signer.sendTransaction({
+      const transaction = await signer.sendTransaction({ 
+        // Details about the transaction would go here
       });
 
       await transaction.wait();
-      setUserState((prev) => ({ ...prev, transactionStatus: 'success' }));
+      setWalletState((prev) => ({ ...prev, transactionStatus: 'success' }));
     } catch (error) {
       console.error('Transaction failed:', error);
-      setUserState((prev) => ({ ...prev, transactionStatus: 'error' }));
+      setWalletState((prev) => ({ ...prev, transactionStatus: 'error' }));
     }
   };
 
   return (
     <div>
-      {!userState.walletConnected ? (
-        <button onClick={connectWallet}>Connect Wallet</button>
+      {!walletState.isConnected ? (
+        <button onClick={initiateWalletConnection}>Connect Wallet</button>
       ) : (
         <>
-          <Dashboard userState={userState} />
-          <AssetTokenizeForm tokenizeAsset={tokenizeAsset} />
+          <Dashboard userState={walletState} />
+          <AssetTokenizeForm onAssetTokenization={executeAssetTokenization} />
         </>
       )}
     </div>
