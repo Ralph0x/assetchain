@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext, createContext } from 'react';
-import AssetTokenizdeForm from './AssetTokenizeForm';
+import React, { useState, useEffect, createContext } from 'react';
+import AssetTokenizeForm from './AssetTokenizeForm';
 import Dashboard from './Dashboard';
 
 const WalletContext = createContext();
@@ -20,12 +20,14 @@ function App() {
       }
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       setWalletConnected(true);
+      logToConsole('Wallet connection successful.');
     } catch (error) {
       handleConnectionError(error);
     }
   };
 
   const handleConnectionError = (error) => {
+    logToConsole('Error connecting to wallet: ' + error.message);
     if (error.code === 4001) {
       setError("User denied account access.");
     } else {
@@ -36,6 +38,7 @@ function App() {
 
   const updateTransactionStatus = (status) => {
     setTransactionStatus(status);
+    logToConsole('Transaction status updated.');
   };
 
   const renderError = () => (
@@ -44,20 +47,25 @@ function App() {
     </div>
   );
 
+  // New function to log messages to the console
+  const logToConsole = (message) => {
+    console.log(message);
+  };
+
   return (
-    <WalletContext.Provider value={{walletConnected, transactionStatus, updateTransactionStatus}}>
+    <WalletContext.Provider value={{walletConnected, transactionStatus, updateTransactionID: updateTransactionStatus}}>
     <div className="App">
       {error && renderError()}
       {walletConnected ? (
         <>
           <Dashboard />
-          <AssetTokenizeForm />
+          <AssetTokenize1Form />
         </>
       ) : (
-        <button onClick={connectAppDelegateWallet}>Connect Wallet</button>
+        <button onClick={connectWallet}>Connect Wallet</button> 
       )}
     </div>
-    </WalletMobile.Context.Provider>
+    </WalletContext.Provider>
   );
 }
 
